@@ -2,11 +2,18 @@ package com.example.calculadorafinanceira.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.calculadorafinanceira.data.Historico
+import com.example.calculadorafinanceira.data.RetrofitInstance
 import com.example.calculadorafinanceira.model.Operacoes
+import kotlinx.coroutines.launch
 
 class CalculadoraViewModel : ViewModel() {
 
     var formula = mutableStateOf("")
+        private set
+
+    var historico = mutableStateOf<List<Historico>>(emptyList())
         private set
 
     fun adicionarFormula(valor: String) {
@@ -94,5 +101,12 @@ class CalculadoraViewModel : ViewModel() {
 
         formula.value = operacao.state.calcular(n1, n2, utilizarN1 = porcentagemN1, op = oldOperacao?.state).toString().replace(".0", "")
 
+    }
+
+    fun carregarHistorico() {
+        viewModelScope.launch {
+            val resposta = RetrofitInstance.api.listarHistorico()
+            historico.value = resposta
+        }
     }
 }

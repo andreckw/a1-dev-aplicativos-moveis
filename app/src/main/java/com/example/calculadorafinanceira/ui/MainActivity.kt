@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +50,10 @@ class MainActivity : ComponentActivity() {
 fun Inicio() {
     val viewModel : CalculadoraViewModel = viewModel()
     val formula by viewModel.formula
+
+    LaunchedEffect(Unit) {
+        viewModel.carregarHistorico()
+    }
 
 
     Column(modifier = Modifier.fillMaxSize().padding(15.dp)) {
@@ -208,6 +213,13 @@ fun Inicio() {
             }) {
                 Text("=")
             }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text("Histórico:")
+        viewModel.historico.value.forEach {
+            Text("${it.formula} = ${it.resultado}")
         }
     }
 }
