@@ -1,12 +1,16 @@
 package com.example.calculadorafinanceira.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.calculadorafinanceira.data.Historico
 import com.example.calculadorafinanceira.data.RetrofitInstance
 import com.example.calculadorafinanceira.model.Operacoes
+import com.example.calculadorafinanceira.model.bd.AppDatabase
+import com.example.calculadorafinanceira.model.bd.Historico
+import com.example.calculadorafinanceira.model.bd.daos.HistoricoDao
 import kotlinx.coroutines.launch
+import java.net.ConnectException
 
 class CalculadoraViewModel : ViewModel() {
 
@@ -103,10 +107,23 @@ class CalculadoraViewModel : ViewModel() {
 
     }
 
-    fun carregarHistorico() {
-        viewModelScope.launch {
-            val resposta = RetrofitInstance.api.listarHistorico()
-            historico.value = resposta
+    suspend fun carregarHistorico(historicoDao: HistoricoDao) {
+
+
+        if (historicoDao.buscarTodos().isEmpty()) {
+            try {
+                viewModelScope.launch {
+                    val resposta = RetrofitInstance.api.listarHistorico()
+                    for (r in resposta) {
+                        historicoDao.inserir(r)
+                    }
+                }
+            } catch (e: Exception) {
+                print(e)
+            }
         }
+
+        historico.value = historicoDao.buscarTodos()
+
     }
 }
