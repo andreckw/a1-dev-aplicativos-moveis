@@ -86,11 +86,9 @@ O fluxo de navegação é gerenciado pelo **Jetpack Navigation** dentro da `Main
 
 ```mermaid
 graph TD
-    A[MainActivity: NavHost] --> B(CalculadoraBasicaScreen)
+    A[NavHost] --> B(CalculadoraBasicaScreen)
     B --> C(CalculadoraFinanceiraScreen)
     C --> B
-    B --> D(HistoricoScreen)
-    D --> B
 ```
 
 -----
