@@ -1,12 +1,23 @@
 package com.example.calculadorafinanceira.viewmodel
 
+import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.calculadorafinanceira.data.RetrofitInstance
 import com.example.calculadorafinanceira.model.Operacoes
+import com.example.calculadorafinanceira.model.bd.AppDatabase
+import com.example.calculadorafinanceira.model.bd.Historico
+import com.example.calculadorafinanceira.model.bd.daos.HistoricoDao
+import kotlinx.coroutines.launch
+import java.net.ConnectException
 
 class CalculadoraViewModel : ViewModel() {
 
     var formula = mutableStateOf("")
+        private set
+
+    var historico = mutableStateOf<List<Historico>>(emptyList())
         private set
 
     fun adicionarFormula(valor: String) {
@@ -93,6 +104,26 @@ class CalculadoraViewModel : ViewModel() {
 
 
         formula.value = operacao.state.calcular(n1, n2, utilizarN1 = porcentagemN1, op = oldOperacao?.state).toString().replace(".0", "")
+
+    }
+
+    suspend fun carregarHistorico(historicoDao: HistoricoDao) {
+
+
+        if (historicoDao.buscarTodos().isEmpty()) {
+            try {
+                viewModelScope.launch {
+                    val resposta = RetrofitInstance.api.listarHistorico()
+                    for (r in resposta) {
+                        historicoDao.inserir(r)
+                    }
+                }
+            } catch (e: Exception) {
+                print(e)
+            }
+        }
+
+        historico.value = historicoDao.buscarTodos()
 
     }
 }
